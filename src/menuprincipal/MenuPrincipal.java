@@ -33,6 +33,7 @@ public class MenuPrincipal {
 
     // ── INICIALIZACIÓN ──────────────────────────────────────────────
     static void inicializarEstudiante() {
+
         System.out.println("=== BIENVENIDO AL SISTEMA DE AUTOGESTIÓN ESTUDIANTIL ===");
         System.out.print("Ingrese su nombre: ");
         String nombre = scanner.nextLine();
@@ -118,7 +119,7 @@ public class MenuPrincipal {
         } catch (IllegalArgumentException e) {
             System.out.println("  ❌ Error: " + e.getMessage() + "\n");
         }
-        System.out.println("\n  Presione Enter para volver al menú principal...");
+        System.out.println("\n  Presione Enter para volver ...");
         scanner.nextLine();
     }
 
@@ -132,6 +133,9 @@ public class MenuPrincipal {
         } catch (IllegalArgumentException e) {
             System.out.println("  ❌ Error: " + e.getMessage() + "\n");
         }
+
+        System.out.println("\n  Presione Enter para volver ...");
+        scanner.nextLine();
     }
 
     static void listarMaterias() {
@@ -150,7 +154,7 @@ public class MenuPrincipal {
                     ins.getPromedio());
         }
         System.out.println();
-        System.out.println("\n  Presione Enter para volver al menú principal...");
+        System.out.println("\n  Presione Enter para volver ...");
         scanner.nextLine();
     }
 
@@ -164,6 +168,8 @@ public class MenuPrincipal {
             ins.getMateria().mostrarResumen();
             ins.mostrarEstadoAcademico();
         }
+        System.out.println("\n  Presione Enter para volver ...");
+        scanner.nextLine();
     }
 
     static void buscarMateriaPorCuatrimestre() {
@@ -177,6 +183,9 @@ public class MenuPrincipal {
             for (InscripcionMateria ins : resultado)
                 ins.getMateria().mostrarResumen();
         }
+
+        System.out.println("\n  Presione Enter para volver ...");
+        scanner.nextLine();
     }
 
     // ── ASISTENCIA ──────────────────────────────────────────────────
@@ -245,7 +254,7 @@ public class MenuPrincipal {
     }
 
     static void reporteSituacionGeneral() {
-        System.out.println("\n====== SITUACIÓN GENERAL ======");
+        System.out.println("\n--- SITUACIÓN GENERAL ---");
         int regulares = 0, riesgo = 0, libres = 0;
         for (InscripcionMateria ins : estudiante.getMaterias()) {
             double asist = ins.getPorcentajeAsistencia();
@@ -258,6 +267,9 @@ public class MenuPrincipal {
         }
         System.out.printf("%nPromedio general: %.2f%n", estudiante.getPromedioGeneral());
         System.out.printf("Regulares: %d | En riesgo: %d | Libres: %d%n%n", regulares, riesgo, libres);
+
+        System.out.println("\n  Presione Enter para volver al menú principal...");
+        scanner.nextLine();
     }
 
     static void reporteMateriasEnRiesgo() {
@@ -271,15 +283,23 @@ public class MenuPrincipal {
                     criticas.set(j, criticas.get(j+1));
                     criticas.set(j+1, tmp);
                 }
-        System.out.println("\n====== MATERIAS EN RIESGO ======");
+
+        System.out.println("\n  Presione Enter para volver ...");
+        scanner.nextLine();
+
+        System.out.println("--- MATERIAS EN RIESGO ---");
         for (InscripcionMateria ins : criticas)
             System.out.printf("  %-20s | Asistencia: %.1f%%%n",
                     ins.getMateria().getNombre(), ins.getPorcentajeAsistencia());
         System.out.println();
+
+        System.out.println("\n  Presione Enter para volver ...");
+        scanner.nextLine();
+
     }
 
     static void reporteMateriasAprobadas() {
-        System.out.println("\n====== MATERIAS APROBADAS ======");
+        System.out.println("--- MATERIAS APROBADAS ---");
         double max = -1, min = 11, suma = 0;
         int count = 0;
         for (InscripcionMateria ins : estudiante.getMaterias()) {
@@ -291,10 +311,16 @@ public class MenuPrincipal {
                 suma += p;
                 count++;
             }
+
+
         }
         if (count == 0) { System.out.println("  No hay materias aprobadas aún.\n"); return; }
         System.out.printf("%n  Nota máxima: %.2f | Nota mínima: %.2f | Promedio conjunto: %.2f%n%n",
                 max, min, suma / count);
+
+
+        System.out.println("\n  Presione Enter para volver ...");
+        scanner.nextLine();
     }
 
     // ── HELPERS ─────────────────────────────────────────────────────
