@@ -15,7 +15,11 @@ public class MenuPrincipal {
             mostrarMenuPrincipal();
             opcion = leerEnteroValido();
             switch (opcion) {
-                case 1: estudiante.mostrarResumen();     break;
+                case 1:
+                    estudiante.mostrarResumen();
+                    System.out.println("\n  Presione Enter para volver al menú principal...");
+                    scanner.nextLine();
+                    break;
                 case 2: menuGestionMaterias();           break;
                 case 3: registrarAsistencia();           break;
                 case 4: registrarCalificacion();         break;
@@ -44,16 +48,16 @@ public class MenuPrincipal {
 
     // ── MENÚ PRINCIPAL ──────────────────────────────────────────────
     static void mostrarMenuPrincipal() {
-        System.out.println("----------------------------------------");
+        System.out.println("========================================");
         System.out.println("|    SISTEMA DE AUTOGESTIÓN ESCOLAR    |");
-        System.out.println("----------------------------------------");
-        System.out.println("|  1. Ver perfil del estudiante        |");
-        System.out.println("|  2. Gestión de materias (submenú)    |");
-        System.out.println("|  3. Registrar asistencia             |");
-        System.out.println("|  4. Registrar calificación           |");
-        System.out.println("|  5. Ver reportes                     |");
-        System.out.println("|  6. Salir                            |");
-        System.out.println("----------------------------------------");
+        System.out.println("========================================");
+        System.out.println("   1. Ver perfil del estudiante         ");
+        System.out.println("   2. Gestión de materias (submenú)     ");
+        System.out.println("   3. Registrar asistencia              ");
+        System.out.println("   4. Registrar calificación            ");
+        System.out.println("   5. Ver reportes                      ");
+        System.out.println("   6. Salir                             ");
+        System.out.println("========================================");
         System.out.print("Seleccione una opción: ");
     }
 
@@ -61,13 +65,15 @@ public class MenuPrincipal {
     static void menuGestionMaterias() {
         int subOpcion;
         do {
-            System.out.println("\n--- GESTIÓN DE MATERIAS ---");
+            System.out.println("========================================");
+            System.out.println("========== GESTIÓN DE MATERIAS =========");
             System.out.println("  1. Inscribirse a una materia");
             System.out.println("  2. Darse de baja de una materia");
             System.out.println("  3. Listar materias inscriptas");
             System.out.println("  4. Buscar materia por código");
             System.out.println("  5. Buscar materias por cuatrimestre");
             System.out.println("  6. Volver al menú principal");
+            System.out.println("=========================================");
             System.out.print("Seleccione una opción: ");
             subOpcion = leerEnteroSubMenu();
             switch (subOpcion) {
@@ -86,12 +92,25 @@ public class MenuPrincipal {
         System.out.println("\n-- Inscripción a materia --");
         System.out.print("  Nombre de la materia: ");
         String nombre = scanner.nextLine();
-        System.out.print("  Código (3-10 caracteres): ");
-        String codigo = scanner.nextLine();
+
+        String codigo;
+        do {
+            System.out.print("  Código (3-10 caracteres): ");
+            codigo = scanner.nextLine().trim();
+            if (codigo.length() < 3 || codigo.length() > 10)
+            {
+                System.out.println(" El código debe tener entre 3 y 10 caracteres. Intente nuevamente.");
+            }
+        }
+        while (codigo.length() < 3 || codigo.length() > 10);
+
+
+
         System.out.print("  Cuatrimestre (1 o 2): ");
         int cuatri = leerEnteroSubMenu();
         System.out.print("  Año: ");
         int anio = leerEnteroSubMenu();
+
         try {
             Materia m = new Materia(nombre, codigo, cuatri, anio);
             estudiante.inscribirse(m);
@@ -99,6 +118,8 @@ public class MenuPrincipal {
         } catch (IllegalArgumentException e) {
             System.out.println("  ❌ Error: " + e.getMessage() + "\n");
         }
+        System.out.println("\n  Presione Enter para volver al menú principal...");
+        scanner.nextLine();
     }
 
     static void darDeBajaMateria() {
@@ -129,6 +150,8 @@ public class MenuPrincipal {
                     ins.getPromedio());
         }
         System.out.println();
+        System.out.println("\n  Presione Enter para volver al menú principal...");
+        scanner.nextLine();
     }
 
     static void buscarMateriaPorCodigo() {
@@ -174,11 +197,14 @@ public class MenuPrincipal {
         else if (porcentaje < 80)
             System.out.println("  ⚠️  ADVERTENCIA: estás en zona de riesgo (< 80%)");
         System.out.println();
+        System.out.println("\n  Presione Enter para volver al menú principal...");
+        scanner.nextLine();
     }
 
     // ── CALIFICACIONES ──────────────────────────────────────────────
     static void registrarCalificacion() {
-        System.out.println("\n--- REGISTRAR CALIFICACIÓN ---");
+
+        System.out.println("--- REGISTRAR CALIFICACIÓN ---");
         System.out.print("  Código de la materia: ");
         String codigo = scanner.nextLine();
         InscripcionMateria ins = estudiante.getInscripcion(codigo);
@@ -195,14 +221,19 @@ public class MenuPrincipal {
         } catch (IllegalArgumentException e) {
             System.out.println("  ❌ " + e.getMessage());
         }
+
+        System.out.println("\n  Presione Enter para volver al menú principal...");
+        scanner.nextLine();
     }
 
     // ── REPORTES ────────────────────────────────────────────────────
     static void verReportes() {
-        System.out.println("\n--- VER REPORTES ---");
+        System.out.println("========================================");
+        System.out.println("============ VER REPORTES ==============");
         System.out.println("  1. Situación general");
         System.out.println("  2. Materias en riesgo");
         System.out.println("  3. Materias aprobadas");
+        System.out.println("========================================");
         System.out.print("Seleccione: ");
         int op = leerEnteroSubMenu();
         switch (op) {
