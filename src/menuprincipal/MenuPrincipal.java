@@ -1,12 +1,15 @@
 package menuprincipal;
-
+import menuprincipal.modelo.Materia;
+import menuprincipal.modelo.InscripcionMateria;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class MenuPrincipal {
 
     static Scanner scanner = new Scanner(System.in);
-
+    static ArrayList<InscripcionMateria> inscripciones = new ArrayList<>();
     public static void main(String[] args) {
+
         int opcion;
 
         do 
@@ -98,37 +101,36 @@ public class MenuPrincipal {
 
         do {
             System.out.println("\n--- GESTION DE MATERIAS ---");
-            System.out.println("  1. Agregar materia");
-            System.out.println("  2. Eliminar materia");
-            System.out.println("  3. Listar materias");
-            System.out.println("  4. Volver al menu principal");
+            System.out.println("  1. Inscribirse a una materia");
+            System.out.println("  2. Darse de baja de una materia");
+            System.out.println("  3. Listar materias inscriptas");
+            System.out.println("  4. Buscar materia");
+            System.out.println("  5. Volver al menu principal");
             System.out.print("Seleccione una opcion: ");
 
             subOpcion = leerEnteroSubMenu();
 
             switch (subOpcion) {
                 case 1:
-                    System.out.print("Ingrese el nombre de la materia a agregar: ");
-                    String agregar = scanner.nextLine();
-                    System.out.println(" Materia '" + agregar + "' agregada correctamente.\n");
+                    inscribirseAMateria();
                     break;
                 case 2:
-                    System.out.print("Ingrese el nombre de la materia a eliminar: ");
-                    String eliminar = scanner.nextLine();
-                    System.out.println(" Materia '" + eliminar + "' eliminada correctamente.\n");
+                    darseDeBaja();
                     break;
                 case 3:
-                    System.out.println(" Lista de materias registradas:");
-                    System.out.println("   (No hay materias cargadas aun)\n");
+                    listarMaterias();
                     break;
                 case 4:
+                    buscarMateria();
+                    break;
+                case 5:
                     System.out.println("  Volviendo al menu principal...\n");
                     break;
                 default:
-                    System.out.println("\n  Opcion invalida. Ingrese una opcion del 1 al 4.\n");
+                    System.out.println("\n  Opcion invalida. Ingrese una opcion del 1 al 5.\n");
             }
 
-        } while (subOpcion != 4);
+        } while (subOpcion != 5);
     }
 
     // Lee entero para el submenú sin redibujar el menú principal
@@ -207,4 +209,134 @@ public class MenuPrincipal {
         System.out.println("   (Implemente la logica de datos para ver valores reales)");
         System.out.println("--------------------\n");
     }
+    static void inscribirseAMateria() {
+        System.out.println("\n-- Inscripcion a materia --");
+
+        System.out.print("Nombre de la materia: ");
+        String nombre = scanner.nextLine();
+
+        // Validación del código
+        String codigo = "";
+        boolean codigoValido = false;
+        while (!codigoValido) {
+            System.out.print("Codigo (3-10 caracteres): ");
+            codigo = scanner.nextLine();
+            if (codigo.length() < 3 || codigo.length() > 10) {
+                System.out.println("  ⚠️  El codigo debe tener entre 3 y 10 caracteres.");
+            } else {
+                codigoValido = true;
+            }
+        }
+
+        // Verificar que no exista ya esa inscripción
+        String codigoFinal = codigo;
+        boolean duplicado = inscripciones.stream()
+                .anyMatch(i -> i.getMateria().getCodigo().equalsIgnoreCase(codigoFinal));
+        if (duplicado) {
+            System.out.println("  ⚠️  Ya estás inscripto a una materia con ese código.\n");
+            return;
+        }
+
+        // Validación del cuatrimestre
+        int cuatrimestre = 0;
+        while (cuatrimestre != 1 && cuatrimestre != 2) {
+            System.out.print("Cuatrimestre (1 o 2): ");
+            cuatrimestre = leerEnteroSubMenu();
+            if (cuatrimestre != 1 && cuatrimestre != 2) {
+                System.out.println("  ⚠️  El cuatrimestre debe ser 1 o 2.");
+            }
+        }
+
+        System.out.print("Año: ");
+        int anio = leerEnteroSubMenu();
+
+        System.out.print("Total de clases de la cursada: ");
+        int totalClases = leerEnteroSubMenu();
+
+        // Crear objetos y agregar a la lista
+        Materia materia = new Materia(nombre, codigo, cuatrimestre, anio);
+        InscripcionMateria inscripcion = new InscripcionMateria(materia, totalClases);
+        inscripciones.add(inscripcion);
+
+        System.out.println("  ✅ Inscripción a '" + nombre + "' registrada correctamente.\n");
+    }
+
+    static void darseDeBaja() {
+        System.out.println("\n-- Baja de materia --");
+
+        if (inscripciones.isEmpty()) {
+            System.out.println("  No hay materias inscriptas.\n");
+            return;
+        }
+
+        System.out.print("Ingrese el codigo de la materia a eliminar: ");
+        String codigo = scanner.nextLine();
+
+        InscripcionMateria aEliminar = null;
+        for (InscripcionMateria ins : inscripciones) {
+            if (ins.getMateria().getCodigo().equalsIgnoreCase(codigo)) {
+                aEliminar = ins;
+                break;
+            }
+        }
+
+        if (aEliminar == null) {
+            System.out.println("  ⚠️  No se encontró una materia con ese código.\n");
+        } else {
+            inscripciones.remove(aEliminar);
+            System.out.println("  ✅ Materia '" + aEliminar.getMateria().getNombre() + "' eliminada correctamente.\n");
+        }
+    }
+
+    // -------------------------------------------------------
+//  Listar todas las materias inscriptas
+// -------------------------------------------------------
+    static void listarMaterias() {
+        System.out.println("\n-- Materias inscriptas --");
+
+        if (inscripciones.isEmpty()) {
+            System.out.println("  No hay materias inscriptas.\n");
+            return;
+        }
+
+        for (int i = 0; i < inscripciones.size(); i++) {
+            System.out.println("  " + (i + 1) + ". " + inscripciones.get(i).toString());
+        }
+        System.out.println();
+    }
+
+    // -------------------------------------------------------
+//  Buscar materia por código o nombre parcial
+// -------------------------------------------------------
+    static void buscarMateria() {
+        System.out.println("\n-- Buscar materia --");
+
+        if (inscripciones.isEmpty()) {
+            System.out.println("  No hay materias inscriptas.\n");
+            return;
+        }
+
+        System.out.print("Ingrese codigo o nombre (búsqueda parcial): ");
+        String busqueda = scanner.nextLine().toLowerCase();
+
+        ArrayList<InscripcionMateria> resultados = new ArrayList<>();
+        for (InscripcionMateria ins : inscripciones) {
+            String nombreM = ins.getMateria().getNombre().toLowerCase();
+            String codigoM = ins.getMateria().getCodigo().toLowerCase();
+            if (nombreM.contains(busqueda) || codigoM.contains(busqueda)) {
+                resultados.add(ins);
+            }
+        }
+
+        if (resultados.isEmpty()) {
+            System.out.println("  ⚠️  No se encontraron materias con ese criterio.\n");
+        } else {
+            System.out.println("  Resultados encontrados: " + resultados.size());
+            for (InscripcionMateria ins : resultados) {
+                System.out.println("  → " + ins.toString());
+            }
+            System.out.println();
+        }
+    }
+
 }
