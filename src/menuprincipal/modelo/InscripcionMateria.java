@@ -15,7 +15,7 @@ public class InscripcionMateria implements Evaluable {
     // -------------------------------------------------------
     public InscripcionMateria(Materia materia) {
         this.materia = materia;
-        this.totalClases = totalClases;
+        this.totalClases = 0;
         this.clasesAsistidas = 0;
         this.notas = new ArrayList<>();
     }

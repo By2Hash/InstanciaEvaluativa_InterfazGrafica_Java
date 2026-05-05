@@ -1,8 +1,10 @@
 package menuprincipal.modelo;
 
+import menuprincipal.interfaces.Consultable;
+
 import java.util.ArrayList;
 
-public class Estudiante extends PersonaAcademica implements Consultable{
+public class Estudiante extends PersonaAcademica implements Consultable {
 
     private String carrera;
     private int anioIngreso;
@@ -67,13 +69,17 @@ public class Estudiante extends PersonaAcademica implements Consultable{
 
     @Override
     public void mostrarResumen() {
-        System.out.println("========== PERFIL DEL ESTUDIANTE ==========");
-        System.out.println("  Nombre       : " + getNombre());
-        System.out.println("  Legajo       : " + getLegajo());
-        System.out.println("  Carrera      : " + carrera);
-        System.out.println("  Anio ingreso  : " + anioIngreso);
-        System.out.printf( "  Promedio gral: %.2f%n", getPromedioGeneral());
-        System.out.println("  Materias     : " + materias.size());
-        System.out.println("===========================================");
+        System.out.println("----------------------------------------");
+        System.out.println("|         PERFIL DEL ESTUDIANTE        |");
+        System.out.println("----------------------------------------");
+        System.out.println("|  Nombre       : " + getNombre());
+        System.out.println("|  Legajo       : " + getLegajo());
+        System.out.println("|  Carrera      : " + carrera);
+        System.out.println("|  Anio ingreso  : " + anioIngreso);
+        System.out.printf( "|  Promedio gral: %.2f%n", getPromedioGeneral());
+        System.out.println("|  Materias     : " + materias.size());
+        System.out.println("----------------------------------------");
     }
+
+
 }
