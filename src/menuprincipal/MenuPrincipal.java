@@ -1,4 +1,5 @@
 package menuprincipal;
+import menuprincipal.modelo.Estudiante;
 import menuprincipal.modelo.Materia;
 import menuprincipal.modelo.InscripcionMateria;
 import java.util.ArrayList;
@@ -7,9 +8,13 @@ import java.util.Scanner;
 public class MenuPrincipal {
 
     static Scanner scanner = new Scanner(System.in);
+    static Estudiante estudiante = null;
     static ArrayList<InscripcionMateria> inscripciones = new ArrayList<>();
+
+
     public static void main(String[] args) {
 
+        inicializarEstudiante();
         int opcion;
 
         do 
@@ -46,6 +51,24 @@ public class MenuPrincipal {
         scanner.close();
     }
 
+    // ── INICIALIZACION ──────────────────────────────────────────────
+    // Metodo para capturar los datos basicos del estudiante al iniciar el programa
+    static void inicializarEstudiante() {
+
+        System.out.println("=== BIENVENIDO AL SISTEMA DE AUTOGESTION ESTUDIANTIL ===");
+        System.out.print("Ingrese su nombre: ");
+        String nombre = scanner.nextLine();
+        System.out.print("Ingrese su legajo: ");
+        String legajo = scanner.nextLine();
+        System.out.print("Ingrese su carrera: ");
+        String carrera = scanner.nextLine();
+        System.out.print("Ingrese su año de ingreso: ");
+        int anio = leerEnteroValido();
+
+        // Se instancia la clase Estudiante con los datos provistos
+        estudiante = new Estudiante(nombre, legajo, carrera, anio);
+        System.out.println("\n Perfil creado correctamente. ¡Bienvenido, " + nombre + "!\n");
+    }
     // -------------------------------------------------------
     //  Muestra el menú principal
     // -------------------------------------------------------
@@ -145,24 +168,30 @@ public class MenuPrincipal {
         return valor;
     }
 
-    // -------------------------------------------------------
-    //  Opción 3 – Registrar asistencia
-    // -------------------------------------------------------
+    // ── ASISTENCIA ──────────────────────────────────────────────────
+    // Permite marcar si el alumno asistio o no a una clase de una materia puntual
     static void registrarAsistencia() {
-        System.out.println("\n--- REGISTRAR ASISTENCIA ---");
-        System.out.print("Ingrese el nombre del estudiante: ");
-        String nombre = scanner.nextLine();
-        System.out.print("Ingrese la materia: ");
-        String materia = scanner.nextLine();
-        System.out.print("¿Asistio? (S/N): ");
-        String asistio = scanner.nextLine();
 
-        String estado = asistio.equalsIgnoreCase("S") ? " Presente" : " Ausente";
-        System.out.println("\nAsistencia registrada:");
-        System.out.println("   Estudiante : " + nombre);
-        System.out.println("   Materia    : " + materia);
-        System.out.println("   Estado     : " + estado);
-        System.out.println("----------------------------\n");
+        System.out.println("\n--- REGISTRAR ASISTENCIA ---");
+        System.out.print("  Codigo de la materia: ");
+        String codigo = scanner.nextLine().trim();
+        InscripcionMateria ins = estudiante.getInscripcion(codigo);
+        if (ins == null) { System.out.println(" Materia no encontrada.\n"); return; }
+
+        System.out.print("  ¿Asistio? (S/N): ");
+        String resp = scanner.nextLine();
+        boolean presente = resp.equalsIgnoreCase("S");
+
+        ins.registrarAsistencia(presente);
+        double porcentaje = ins.getPorcentajeAsistencia();
+        System.out.printf("  Asistencia registrada. Porcentaje actual: %.1f%%%n", porcentaje);
+
+        // Lógica de alertas segun el porcentaje de asistencia
+        if (porcentaje < 75)
+            System.out.println(" ALERTA CRITICA: perdiste la regularidad (< 75%)");
+        else if (porcentaje < 80)
+            System.out.println(" ADVERTENCIA: estas en zona de riesgo (< 80%)");
+        System.out.println();
     }
 
     // -------------------------------------------------------
@@ -216,7 +245,7 @@ public class MenuPrincipal {
         String nombre = scanner.nextLine();
 
         // Validación del código
-        String codigo = "";
+        String codigo = scanner.nextLine();
         boolean codigoValido = false;
         while (!codigoValido) {
             System.out.print("Codigo (3-10 caracteres): ");
@@ -255,7 +284,7 @@ public class MenuPrincipal {
 
         // Crear objetos y agregar a la lista
         Materia materia = new Materia(nombre, codigo, cuatrimestre, anio);
-        InscripcionMateria inscripcion = new InscripcionMateria(materia, totalClases);
+        InscripcionMateria inscripcion = new InscripcionMateria(materia);
         inscripciones.add(inscripcion);
 
         System.out.println("  ✅ Inscripción a '" + nombre + "' registrada correctamente.\n");

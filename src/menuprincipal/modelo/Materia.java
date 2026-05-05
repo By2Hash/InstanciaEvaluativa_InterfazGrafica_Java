@@ -1,6 +1,6 @@
 package menuprincipal.modelo;
 
-public class Materia {
+public class Materia implements Consultable {
 
     private String nombre;
     private String codigo;
@@ -65,8 +65,7 @@ public class Materia {
     //  toString para mostrar info básica
     // -------------------------------------------------------
     @Override
-    public String toString() {
-        return String.format("[%s] %s - %d° cuatrimestre, año %d",
-                codigo, nombre, cuatrimestre, anio);
+    public void mostrarResumen() {
+        System.out.printf("  [%s] %s - %dC Año %d%n", codigo, nombre, cuatrimestre, anio);
     }
 }
