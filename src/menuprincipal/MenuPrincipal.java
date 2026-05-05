@@ -9,7 +9,6 @@ public class MenuPrincipal {
 
     static Scanner scanner = new Scanner(System.in);
     static Estudiante estudiante = null;
-    static ArrayList<InscripcionMateria> inscripciones = new ArrayList<>();
 
 
     public static void main(String[] args) {
@@ -25,7 +24,8 @@ public class MenuPrincipal {
             switch (opcion) 
             {
                 case 1:
-                    verPerfilEstudiante();
+                    estudiante.mostrarResumen();
+                    pausar();
                     break;
                 case 2:
                     menuGestionMaterias();
@@ -55,7 +55,7 @@ public class MenuPrincipal {
     // Metodo para capturar los datos basicos del estudiante al iniciar el programa
     static void inicializarEstudiante() {
 
-        System.out.println("=== BIENVENIDO AL SISTEMA DE AUTOGESTION ESTUDIANTIL ===");
+        System.out.println("----- BIENVENIDO AL SISTEMA DE AUTOGESTION ESTUDIANTIL -----");
         System.out.print("Ingrese su nombre: ");
         String nombre = scanner.nextLine();
         System.out.print("Ingrese su legajo: ");
@@ -93,28 +93,14 @@ public class MenuPrincipal {
         while (!scanner.hasNextInt()) {
             System.out.println("\nEntrada invalida. Por favor, ingrese un numero.\n");
             scanner.next(); // descarta el token no numérico
-            mostrarMenuPrincipal();
+
         }
         int valor = scanner.nextInt();
         scanner.nextLine(); // limpia el buffer
         return valor;
     }
 
-    // -------------------------------------------------------
-    //  Opción 1 – Ver perfil del estudiante
-    // -------------------------------------------------------
-    static void verPerfilEstudiante() {
-        System.out.println("\n--- VER PERFIL DEL ESTUDIANTE ---");
-        System.out.print("Ingrese el nombre del estudiante: ");
-        String nombre = scanner.nextLine();
-        System.out.print("Ingrese el ID del estudiante: ");
-        String id = scanner.nextLine();
 
-        System.out.println("\n Perfil del estudiante:");
-        System.out.println("   Nombre : " + nombre);
-        System.out.println("   ID     : " + id);
-        System.out.println("---------------------------------\n");
-    }
 
     // -------------------------------------------------------
     //  Opción 2 – Submenú de gestión de materias
@@ -123,12 +109,15 @@ public class MenuPrincipal {
         int subOpcion;
 
         do {
-            System.out.println("\n--- GESTION DE MATERIAS ---");
-            System.out.println("  1. Inscribirse a una materia");
-            System.out.println("  2. Darse de baja de una materia");
-            System.out.println("  3. Listar materias inscriptas");
-            System.out.println("  4. Buscar materia");
-            System.out.println("  5. Volver al menu principal");
+            System.out.println("----------------------------------------");
+            System.out.println("|          GESTION DE MATERIAS         |");
+            System.out.println("----------------------------------------");
+            System.out.println("|  1. Inscribirse a una materia        |");
+            System.out.println("|  2. Darse de baja de una materia     |");
+            System.out.println("|  3. Listar materias inscriptas       |");
+            System.out.println("|  4. Buscar materia                   |");
+            System.out.println("|  5. Volver al menu principal         |");
+            System.out.println("----------------------------------------");
             System.out.print("Seleccione una opcion: ");
 
             subOpcion = leerEnteroSubMenu();
@@ -172,7 +161,8 @@ public class MenuPrincipal {
     // Permite marcar si el alumno asistio o no a una clase de una materia puntual
     static void registrarAsistencia() {
 
-        System.out.println("\n--- REGISTRAR ASISTENCIA ---");
+
+        System.out.println("\n------- REGISTRAR ASISTENCIA ---------");
         System.out.print("  Codigo de la materia: ");
         String codigo = scanner.nextLine().trim();
         InscripcionMateria ins = estudiante.getInscripcion(codigo);
@@ -192,51 +182,122 @@ public class MenuPrincipal {
         else if (porcentaje < 80)
             System.out.println(" ADVERTENCIA: estas en zona de riesgo (< 80%)");
         System.out.println();
+
+        pausar();
     }
+
+
 
     // -------------------------------------------------------
     //  Opción 4 – Registrar calificación
     // -------------------------------------------------------
     static void registrarCalificacion() {
-        System.out.println("\n--- REGISTRAR CALIFICACION ---");
-        System.out.print("Ingrese el nombre del estudiante: ");
-        String nombre = scanner.nextLine();
-        System.out.print("Ingrese la materia: ");
-        String materia = scanner.nextLine();
-        System.out.print("Ingrese la calificacion (0-10): ");
+        System.out.println("-------- REGISTRAR CALIFICACION ----------");
 
-        double calificacion = -1;
-        while (calificacion < 0 || calificacion > 10) {
-            while (!scanner.hasNextDouble()) {
-                System.out.println("  Ingrese un numero valido: ");
-                scanner.next();
-            }
-            calificacion = scanner.nextDouble();
-            scanner.nextLine();
-            if (calificacion < 0 || calificacion > 10) {
-                System.out.println("  La calificacion debe estar entre 0 y 10. Intente de nuevo: ");
+        // Verificar que haya materias
+        if (estudiante.getMaterias().isEmpty()) {
+            System.out.println("  No hay materias inscriptas.  ");
+            pausar();
+            return;
+        }
+
+        // Punto 1: buscar la materia inscripta por código
+        System.out.print("  Codigo de la materia: ");
+        String codigo = scanner.nextLine().trim();
+
+        InscripcionMateria ins = estudiante.getInscripcion(codigo);
+        if (ins == null) {
+            System.out.println("  Materia no encontrada.\n");
+            pausar();
+            return;
+        }
+
+        // Punto 4: no permitir más de 5 notas
+        if (ins.getNotas().size() >= 5) {
+            System.out.println("  Ya se alcanzó el límite de 5 notas para esta materia.\n");
+            mostrarNotasMateria(ins);
+            pausar();
+            return;
+        }
+
+        // Mostrar notas actuales antes de agregar
+        mostrarNotasMateria(ins);
+
+        // Punto 1: pedir nota con validación de rango 0-10
+        double nota = -1;
+        boolean entradaValida = false;
+        while (!entradaValida) {
+            System.out.print("  Ingrese la nota (0-10): ");
+            if (scanner.hasNextDouble()) {
+                nota = scanner.nextDouble();
+                scanner.nextLine();
+                if (nota >= 0 && nota <= 10) {
+                    entradaValida = true;
+                } else {
+                    System.out.println("  La nota debe estar entre 0 y 10. Intente de nuevo.");
+                }
+            } else {
+                System.out.println("  Entrada invalida. Ingrese un numero.");
+                scanner.nextLine();
             }
         }
 
-        System.out.println("\nCalificacion registrada:");
-        System.out.println("   Estudiante    : " + nombre);
-        System.out.println("   Materia       : " + materia);
-        System.out.println("   Calificacion  : " + calificacion);
-        System.out.println("------------------------------\n");
+        // Agregar la nota al modelo
+        ins.agregarNota(nota);
+
+        // Punto 3: indicar si ese parcial/TP aprobó o no
+        System.out.println();
+        if (nota >= 6) {
+            System.out.printf("  Parcial/TP APROBADO (%.1f >= 6)%n", nota);
+        } else {
+            System.out.printf("  Parcial/TP DESAPROBADO (%.1f < 6)%n", nota);
+        }
+
+        // Punto 2: mostrar todas las notas con el promedio actualizado
+        System.out.println();
+        mostrarNotasMateria(ins);
+        pausar();
+    }
+
+
+    static void mostrarNotasMateria(InscripcionMateria ins) {
+        System.out.println("  ----------------------------------------");
+        System.out.println("  Materia  : " + ins.getMateria().getNombre()
+                + " [" + ins.getMateria().getCodigo() + "]");
+        System.out.println("  Condicion: " + ins.getCondicion());
+
+        ArrayList<Double> notas = ins.getNotas();
+        if (notas.isEmpty()) {
+            System.out.println("  Notas    : (sin notas registradas)");
+        } else {
+            System.out.print("  Notas    : ");
+            for (int i = 0; i < notas.size(); i++) {
+                String estado = notas.get(i) >= 6 ? "A" : "D"; // Aprobado / Desaprobado
+                System.out.printf("%.1f(%s)", notas.get(i), estado);
+                if (i < notas.size() - 1) System.out.print("  |  ");
+            }
+            System.out.println();
+            System.out.printf("  Promedio : %.2f%n", ins.getPromedio());
+            System.out.println("  Estado   : " + (ins.estaAprobada() ? "APROBADA" : "No aprobada"));
+        }
+        System.out.println("  Notas restantes: " + (5 - notas.size()) + " de 5");
+        System.out.println("  ----------------------------------------");
     }
 
     // -------------------------------------------------------
     //  Opción 5 – Ver reportes
     // -------------------------------------------------------
+
     static void verReportes() {
-        System.out.println("\n--- VER REPORTES ---");
-        System.out.println(" Resumen del sistema:");
-        System.out.println("   Total de estudiantes registrados : 0");
-        System.out.println("   Total de materias                : 0");
-        System.out.println("   Total de asistencias registradas : 0");
-        System.out.println("   Total de calificaciones          : 0");
-        System.out.println("   (Implemente la logica de datos para ver valores reales)");
-        System.out.println("--------------------\n");
+
+        System.out.println("------------- VER REPORTES -------------");
+        System.out.println("           Resumen del sistema:         ");
+        System.out.println("   Total de estudiantes registrados :  0");
+        System.out.println("   Total de materias                :  0");
+        System.out.println("   Total de asistencias registradas :  0");
+        System.out.println("   Total de calificaciones          :  0");
+        System.out.println("----------------------------------------");
+        pausar();
     }
     static void inscribirseAMateria() {
         System.out.println("\n-- Inscripcion a materia --");
@@ -245,11 +306,13 @@ public class MenuPrincipal {
         String nombre = scanner.nextLine();
 
         // Validación del código
-        String codigo = scanner.nextLine();
+        String codigo = "";
         boolean codigoValido = false;
+
         while (!codigoValido) {
             System.out.print("Codigo (3-10 caracteres): ");
             codigo = scanner.nextLine();
+
             if (codigo.length() < 3 || codigo.length() > 10) {
                 System.out.println("  ⚠️  El codigo debe tener entre 3 y 10 caracteres.");
             } else {
@@ -259,8 +322,7 @@ public class MenuPrincipal {
 
         // Verificar que no exista ya esa inscripción
         String codigoFinal = codigo;
-        boolean duplicado = inscripciones.stream()
-                .anyMatch(i -> i.getMateria().getCodigo().equalsIgnoreCase(codigoFinal));
+        boolean duplicado = estudiante.getInscripcion(codigo) != null;
         if (duplicado) {
             System.out.println("  ⚠️  Ya estás inscripto a una materia con ese código.\n");
             return;
@@ -284,16 +346,18 @@ public class MenuPrincipal {
 
         // Crear objetos y agregar a la lista
         Materia materia = new Materia(nombre, codigo, cuatrimestre, anio);
-        InscripcionMateria inscripcion = new InscripcionMateria(materia);
-        inscripciones.add(inscripcion);
+        estudiante.inscribirse(materia);
+
 
         System.out.println("  ✅ Inscripción a '" + nombre + "' registrada correctamente.\n");
+        pausar();
     }
 
     static void darseDeBaja() {
         System.out.println("\n-- Baja de materia --");
 
-        if (inscripciones.isEmpty()) {
+
+        if (estudiante.getMaterias().isEmpty()) {
             System.out.println("  No hay materias inscriptas.\n");
             return;
         }
@@ -302,7 +366,7 @@ public class MenuPrincipal {
         String codigo = scanner.nextLine();
 
         InscripcionMateria aEliminar = null;
-        for (InscripcionMateria ins : inscripciones) {
+        for (InscripcionMateria ins : estudiante.getMaterias()) {
             if (ins.getMateria().getCodigo().equalsIgnoreCase(codigo)) {
                 aEliminar = ins;
                 break;
@@ -312,9 +376,10 @@ public class MenuPrincipal {
         if (aEliminar == null) {
             System.out.println("  ⚠️  No se encontró una materia con ese código.\n");
         } else {
-            inscripciones.remove(aEliminar);
+           estudiante.darDeBaja(aEliminar.getMateria().getCodigo());
             System.out.println("  ✅ Materia '" + aEliminar.getMateria().getNombre() + "' eliminada correctamente.\n");
         }
+        pausar();
     }
 
     // -------------------------------------------------------
@@ -323,15 +388,18 @@ public class MenuPrincipal {
     static void listarMaterias() {
         System.out.println("\n-- Materias inscriptas --");
 
-        if (inscripciones.isEmpty()) {
+        if (estudiante.getMaterias().isEmpty()) {
             System.out.println("  No hay materias inscriptas.\n");
             return;
         }
 
-        for (int i = 0; i < inscripciones.size(); i++) {
-            System.out.println("  " + (i + 1) + ". " + inscripciones.get(i).toString());
+        ArrayList<InscripcionMateria> lista = estudiante.getMaterias();
+        for (int i = 0; i < lista.size(); i++) {
+            System.out.println("  " + (i + 1) + ". " + lista.get(i).toString());
         }
         System.out.println();
+
+        pausar();
     }
 
     // -------------------------------------------------------
@@ -340,7 +408,7 @@ public class MenuPrincipal {
     static void buscarMateria() {
         System.out.println("\n-- Buscar materia --");
 
-        if (inscripciones.isEmpty()) {
+        if (estudiante.getMaterias().isEmpty()) {
             System.out.println("  No hay materias inscriptas.\n");
             return;
         }
@@ -349,7 +417,7 @@ public class MenuPrincipal {
         String busqueda = scanner.nextLine().toLowerCase();
 
         ArrayList<InscripcionMateria> resultados = new ArrayList<>();
-        for (InscripcionMateria ins : inscripciones) {
+        for (InscripcionMateria ins : estudiante.getMaterias()) {
             String nombreM = ins.getMateria().getNombre().toLowerCase();
             String codigoM = ins.getMateria().getCodigo().toLowerCase();
             if (nombreM.contains(busqueda) || codigoM.contains(busqueda)) {
@@ -366,6 +434,13 @@ public class MenuPrincipal {
             }
             System.out.println();
         }
+
+        pausar();
+    }
+
+    static void pausar() {
+        System.out.println("\nPresione Enter para continuar...");
+        scanner.nextLine();
     }
 
 }

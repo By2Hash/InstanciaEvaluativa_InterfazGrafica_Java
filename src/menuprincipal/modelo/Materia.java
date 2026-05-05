@@ -1,5 +1,7 @@
 package menuprincipal.modelo;
 
+import menuprincipal.interfaces.Consultable;
+
 public class Materia implements Consultable {
 
     private String nombre;
@@ -68,4 +70,10 @@ public class Materia implements Consultable {
     public void mostrarResumen() {
         System.out.printf("  [%s] %s - %dC Año %d%n", codigo, nombre, cuatrimestre, anio);
     }
+
+    @Override
+    public String toString() {
+        return String.format("[%s] %s - %dC Anio %d", codigo, nombre, cuatrimestre, anio);
+    }
+
 }
