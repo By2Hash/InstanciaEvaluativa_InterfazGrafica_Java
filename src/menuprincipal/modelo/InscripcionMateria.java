@@ -13,7 +13,7 @@ public class InscripcionMateria implements Evaluable {
     // -------------------------------------------------------
     //  Constructor
     // -------------------------------------------------------
-    public InscripcionMateria(Materia materia, int totalClases) {
+    public InscripcionMateria(Materia materia) {
         this.materia = materia;
         this.totalClases = totalClases;
         this.clasesAsistidas = 0;
@@ -43,18 +43,18 @@ public class InscripcionMateria implements Evaluable {
     //  Registrar asistencia
     // -------------------------------------------------------
     public void registrarAsistencia(boolean presente) {
-        if (presente) {
-            clasesAsistidas++;
-        }
+        totalClases++;
+        if (presente) clasesAsistidas++;
     }
 
     // -------------------------------------------------------
     //  Agregar nota con validación 0-10
     // -------------------------------------------------------
     public void agregarNota(double nota) {
-        if (nota < 0 || nota > 10) {
+        if (nota < 0 || nota > 10)
             throw new IllegalArgumentException("La nota debe estar entre 0 y 10.");
-        }
+        if (notas.size() >= 5)
+            throw new IllegalStateException("No se pueden agregar mas de 5 notas.");
         notas.add(nota);
     }
 
