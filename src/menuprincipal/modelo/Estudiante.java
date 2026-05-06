@@ -20,10 +20,10 @@ public class Estudiante extends PersonaAcademica implements Consultable {
     public String getCarrera()    { return carrera; }
     public int getAnioIngreso()   { return anioIngreso; }
 
-    public void inscribirse(Materia m) {
+    public void inscribirse(Materia m, int totalClases) {
         if (getInscripcion(m.getCodigo()) != null)
             throw new IllegalArgumentException("Ya estas inscripto en esa materia.");
-        materias.add(new InscripcionMateria(m));
+        materias.add(new InscripcionMateria(m, totalClases));
     }
 
     public void darDeBaja(String codigoMateria) {
@@ -59,8 +59,11 @@ public class Estudiante extends PersonaAcademica implements Consultable {
     public ArrayList<InscripcionMateria> getMateriasCriticas() {
         ArrayList<InscripcionMateria> criticas = new ArrayList<>();
         for (InscripcionMateria ins : materias) {
-            double p = ins.getPorcentajeAsistencia();
-            if (p >= 75 && p <= 85) criticas.add(ins);
+            boolean tieneNotas = !ins.getNotas().isEmpty();
+            boolean promedioEnRiesgo = ins.getPromedio() < 4;
+            if (tieneNotas && promedioEnRiesgo) {
+                criticas.add(ins);
+            }
         }
         return criticas;
     }

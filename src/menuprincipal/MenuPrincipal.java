@@ -213,8 +213,8 @@ public class MenuPrincipal {
         }
 
         // Punto 4: no permitir más de 5 notas
-        if (ins.getNotas().size() >= 5) {
-            System.out.println("  Ya se alcanzó el límite de 5 notas para esta materia.\n");
+        if (ins.getNotas().size() >= 3) {
+            System.out.println("  Ya se alcanzó el límite de 3 notas para esta materia.\n");
             mostrarNotasMateria(ins);
             pausar();
             return;
@@ -280,7 +280,7 @@ public class MenuPrincipal {
             System.out.printf("  Promedio : %.2f%n", ins.getPromedio());
             System.out.println("  Estado   : " + (ins.estaAprobada() ? "APROBADA" : "No aprobada"));
         }
-        System.out.println("  Notas restantes: " + (5 - notas.size()) + " de 5");
+        System.out.println("  Notas restantes: " + (3 - notas.size()) + " de 3");
         System.out.println("  ----------------------------------------");
     }
 
@@ -369,6 +369,7 @@ public class MenuPrincipal {
 
     static void reporteMateriasEnRiesgo() {
         System.out.println("\n-------- MATERIAS EN RIESGO --------");
+        System.out.println("  (Materias con al menos 1 nota y promedio < 4)");
 
         ArrayList<InscripcionMateria> criticas = estudiante.getMateriasCriticas();
 
@@ -378,10 +379,10 @@ public class MenuPrincipal {
             return;
         }
 
-        // Ordenar por asistencia ascendente (burbuja simple)
+        // Ordenar por promedio ascendente (burbuja)
         for (int i = 0; i < criticas.size() - 1; i++) {
             for (int j = 0; j < criticas.size() - 1 - i; j++) {
-                if (criticas.get(j).getPorcentajeAsistencia() > criticas.get(j + 1).getPorcentajeAsistencia()) {
+                if (criticas.get(j).getPromedio() > criticas.get(j + 1).getPromedio()) {
                     InscripcionMateria temp = criticas.get(j);
                     criticas.set(j, criticas.get(j + 1));
                     criticas.set(j + 1, temp);
@@ -390,9 +391,10 @@ public class MenuPrincipal {
         }
 
         for (InscripcionMateria ins : criticas) {
-            System.out.printf("  %-20s | Asistencia: %.1f%%%n",
+            System.out.printf("  %-20s | Promedio: %.2f | Notas: %d%n",
                     ins.getMateria().getNombre(),
-                    ins.getPorcentajeAsistencia());
+                    ins.getPromedio(),
+                    ins.getNotas().size());
         }
         System.out.println("------------------------------------\n");
 
@@ -485,7 +487,7 @@ public class MenuPrincipal {
 
         // Crear objetos y agregar a la lista
         Materia materia = new Materia(nombre, codigo, cuatrimestre, anio);
-        estudiante.inscribirse(materia);
+        estudiante.inscribirse(materia, totalClases);
 
 
         System.out.println("  ✅ Inscripción a '" + nombre + "' registrada correctamente.\n");
