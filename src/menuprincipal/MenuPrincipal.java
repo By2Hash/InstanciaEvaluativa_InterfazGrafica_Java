@@ -16,12 +16,12 @@ public class MenuPrincipal {
         inicializarEstudiante();
         int opcion;
 
-        do 
+        do
         {
             mostrarMenuPrincipal();
             opcion = leerEnteroValido();
 
-            switch (opcion) 
+            switch (opcion)
             {
                 case 1:
                     estudiante.mostrarResumen();
@@ -52,7 +52,6 @@ public class MenuPrincipal {
     }
 
     // ── INICIALIZACION ──────────────────────────────────────────────
-    // Metodo para capturar los datos basicos del estudiante al iniciar el programa
     static void inicializarEstudiante() {
 
         System.out.println("----- BIENVENIDO AL SISTEMA DE AUTOGESTION ESTUDIANTIL -----");
@@ -65,13 +64,10 @@ public class MenuPrincipal {
         System.out.print("Ingrese su año de ingreso: ");
         int anio = leerEnteroValido();
 
-        // Se instancia la clase Estudiante con los datos provistos
         estudiante = new Estudiante(nombre, legajo, carrera, anio);
         System.out.println("\n Perfil creado correctamente. ¡Bienvenido, " + nombre + "!\n");
     }
-    // -------------------------------------------------------
-    //  Muestra el menú principal
-    // -------------------------------------------------------
+
     static void mostrarMenuPrincipal()  {
         System.out.println("----------------------------------------");
         System.out.println("|       SISTEMA DE GESTION ESCOLAR     |");
@@ -86,21 +82,15 @@ public class MenuPrincipal {
         System.out.print("Seleccione una opcion: ");
     }
 
-    // -------------------------------------------------------
-    //  Lee un entero; si el usuario escribe texto, no crashea
-    // -------------------------------------------------------
     static int leerEnteroValido() {
         while (!scanner.hasNextInt()) {
             System.out.println("\nEntrada invalida. Por favor, ingrese un numero.\n");
-            scanner.next(); // descarta el token no numérico
-
+            scanner.next();
         }
         int valor = scanner.nextInt();
-        scanner.nextLine(); // limpia el buffer
+        scanner.nextLine();
         return valor;
     }
-
-
 
     // -------------------------------------------------------
     //  Opción 2 – Submenú de gestión de materias
@@ -145,7 +135,6 @@ public class MenuPrincipal {
         } while (subOpcion != 5);
     }
 
-    // Lee entero para el submenú sin redibujar el menú principal
     static int leerEnteroSubMenu() {
         while (!scanner.hasNextInt()) {
             System.out.println("\n  Entrada invalida. Por favor, ingrese un numero.\n");
@@ -158,10 +147,7 @@ public class MenuPrincipal {
     }
 
     // ── ASISTENCIA ──────────────────────────────────────────────────
-    // Permite marcar si el alumno asistio o no a una clase de una materia puntual
     static void registrarAsistencia() {
-
-
         System.out.println("\n------- REGISTRAR ASISTENCIA ---------");
         System.out.print("  Codigo de la materia: ");
         String codigo = scanner.nextLine().trim();
@@ -176,7 +162,6 @@ public class MenuPrincipal {
         double porcentaje = ins.getPorcentajeAsistencia();
         System.out.printf("  Asistencia registrada. Porcentaje actual: %.1f%%%n", porcentaje);
 
-        // Lógica de alertas segun el porcentaje de asistencia
         if (porcentaje < 75)
             System.out.println(" ALERTA CRITICA: perdiste la regularidad (< 75%)");
         else if (porcentaje < 80)
@@ -186,22 +171,18 @@ public class MenuPrincipal {
         pausar();
     }
 
-
-
     // -------------------------------------------------------
     //  Opción 4 – Registrar calificación
     // -------------------------------------------------------
     static void registrarCalificacion() {
         System.out.println("-------- REGISTRAR CALIFICACION ----------");
 
-        // Verificar que haya materias
         if (estudiante.getMaterias().isEmpty()) {
             System.out.println("  No hay materias inscriptas.  ");
             pausar();
             return;
         }
 
-        // Punto 1: buscar la materia inscripta por código
         System.out.print("  Codigo de la materia: ");
         String codigo = scanner.nextLine().trim();
 
@@ -212,7 +193,6 @@ public class MenuPrincipal {
             return;
         }
 
-        // Punto 4: no permitir más de 5 notas
         if (ins.getNotas().size() >= 3) {
             System.out.println("  Ya se alcanzó el límite de 3 notas para esta materia.\n");
             mostrarNotasMateria(ins);
@@ -220,10 +200,8 @@ public class MenuPrincipal {
             return;
         }
 
-        // Mostrar notas actuales antes de agregar
         mostrarNotasMateria(ins);
 
-        // Punto 1: pedir nota con validación de rango 0-10
         double nota = -1;
         boolean entradaValida = false;
         while (!entradaValida) {
@@ -242,10 +220,8 @@ public class MenuPrincipal {
             }
         }
 
-        // Agregar la nota al modelo
         ins.agregarNota(nota);
 
-        // Punto 3: indicar si ese parcial/TP aprobó o no
         System.out.println();
         if (nota >= 6) {
             System.out.printf("  Parcial/TP APROBADO (%.1f >= 6)%n", nota);
@@ -253,18 +229,24 @@ public class MenuPrincipal {
             System.out.printf("  Parcial/TP DESAPROBADO (%.1f < 6)%n", nota);
         }
 
-        // Punto 2: mostrar todas las notas con el promedio actualizado
         System.out.println();
         mostrarNotasMateria(ins);
         pausar();
     }
 
-
+    // -------------------------------------------------------
+    //  Muestra notas de una materia
+    //  → Usa mostrarEstadoAcademico() de la interfaz Evaluable
+    //    para imprimir condición, promedio y estado de aprobación,
+    //    en lugar de repetir esa lógica con println/printf sueltos.
+    // -------------------------------------------------------
     static void mostrarNotasMateria(InscripcionMateria ins) {
         System.out.println("  ----------------------------------------");
         System.out.println("  Materia  : " + ins.getMateria().getNombre()
                 + " [" + ins.getMateria().getCodigo() + "]");
-        System.out.println("  Condicion: " + ins.getCondicion());
+
+        // Delegamos en el método default de Evaluable
+        ins.mostrarEstadoAcademico();
 
         ArrayList<Double> notas = ins.getNotas();
         if (notas.isEmpty()) {
@@ -272,13 +254,11 @@ public class MenuPrincipal {
         } else {
             System.out.print("  Notas    : ");
             for (int i = 0; i < notas.size(); i++) {
-                String estado = notas.get(i) >= 6 ? "A" : "D"; // Aprobado / Desaprobado
+                String estado = notas.get(i) >= 6 ? "A" : "D";
                 System.out.printf("%.1f(%s)", notas.get(i), estado);
                 if (i < notas.size() - 1) System.out.print("  |  ");
             }
             System.out.println();
-            System.out.printf("  Promedio : %.2f%n", ins.getPromedio());
-            System.out.println("  Estado   : " + (ins.estaAprobada() ? "APROBADA" : "No aprobada"));
         }
         System.out.println("  Notas restantes: " + (3 - notas.size()) + " de 3");
         System.out.println("  ----------------------------------------");
@@ -287,7 +267,6 @@ public class MenuPrincipal {
     // -------------------------------------------------------
     //  Opción 5 – Ver reportes
     // -------------------------------------------------------
-
     static void verReportes() {
         int subOpcion;
 
@@ -446,7 +425,6 @@ public class MenuPrincipal {
         System.out.print("Nombre de la materia: ");
         String nombre = scanner.nextLine();
 
-        // Validación del código
         String codigo = "";
         boolean codigoValido = false;
 
@@ -461,15 +439,12 @@ public class MenuPrincipal {
             }
         }
 
-        // Verificar que no exista ya esa inscripción
-        String codigoFinal = codigo;
         boolean duplicado = estudiante.getInscripcion(codigo) != null;
         if (duplicado) {
             System.out.println("  ⚠️  Ya estás inscripto a una materia con ese código.\n");
             return;
         }
 
-        // Validación del cuatrimestre
         int cuatrimestre = 0;
         while (cuatrimestre != 1 && cuatrimestre != 2) {
             System.out.print("Cuatrimestre (1 o 2): ");
@@ -485,10 +460,8 @@ public class MenuPrincipal {
         System.out.print("Total de clases de la cursada: ");
         int totalClases = leerEnteroSubMenu();
 
-        // Crear objetos y agregar a la lista
         Materia materia = new Materia(nombre, codigo, cuatrimestre, anio);
         estudiante.inscribirse(materia, totalClases);
-
 
         System.out.println("  ✅ Inscripción a '" + nombre + "' registrada correctamente.\n");
         pausar();
@@ -496,7 +469,6 @@ public class MenuPrincipal {
 
     static void darseDeBaja() {
         System.out.println("\n-- Baja de materia --");
-
 
         if (estudiante.getMaterias().isEmpty()) {
             System.out.println("  No hay materias inscriptas.\n");
@@ -517,15 +489,12 @@ public class MenuPrincipal {
         if (aEliminar == null) {
             System.out.println("  ⚠️  No se encontró una materia con ese código.\n");
         } else {
-           estudiante.darDeBaja(aEliminar.getMateria().getCodigo());
+            estudiante.darDeBaja(aEliminar.getMateria().getCodigo());
             System.out.println("  ✅ Materia '" + aEliminar.getMateria().getNombre() + "' eliminada correctamente.\n");
         }
         pausar();
     }
 
-    // -------------------------------------------------------
-//  Listar todas las materias inscriptas
-// -------------------------------------------------------
     static void listarMaterias() {
         System.out.println("\n-- Materias inscriptas --");
 
@@ -543,9 +512,6 @@ public class MenuPrincipal {
         pausar();
     }
 
-    // -------------------------------------------------------
-//  Buscar materia por código o nombre parcial
-// -------------------------------------------------------
     static void buscarMateria() {
         System.out.println("\n-- Buscar materia --");
 
@@ -583,5 +549,4 @@ public class MenuPrincipal {
         System.out.println("\nPresione Enter para continuar...");
         scanner.nextLine();
     }
-
 }
