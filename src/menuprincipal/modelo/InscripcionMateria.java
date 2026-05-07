@@ -13,10 +13,10 @@ public class InscripcionMateria implements Evaluable {
     // -------------------------------------------------------
     //  Constructor
     // -------------------------------------------------------
-    public InscripcionMateria(Materia materia) {
+    public InscripcionMateria(Materia materia, int totalClases) {
         this.materia = materia;
-        this.totalClases = 0;
-        this.clasesAsistidas = 0;
+        this.totalClases = totalClases;
+        this.clasesAsistidas = totalClases; // asistencia perfecta por defecto
         this.notas = new ArrayList<>();
     }
 
@@ -43,8 +43,11 @@ public class InscripcionMateria implements Evaluable {
     //  Registrar asistencia
     // -------------------------------------------------------
     public void registrarAsistencia(boolean presente) {
-        totalClases++;
-        if (presente) clasesAsistidas++;
+        if (!presente) {
+            // solo descuenta si faltó, no incrementa totalClases
+            if (clasesAsistidas > 0) clasesAsistidas--;
+        }
+        // si presente == true, no hace nada (ya tiene asistencia perfecta)
     }
 
     // -------------------------------------------------------
@@ -53,8 +56,8 @@ public class InscripcionMateria implements Evaluable {
     public void agregarNota(double nota) {
         if (nota < 0 || nota > 10)
             throw new IllegalArgumentException("La nota debe estar entre 0 y 10.");
-        if (notas.size() >= 5)
-            throw new IllegalStateException("No se pueden agregar mas de 5 notas.");
+        if (notas.size() >= 3)  // límite cambiado a 3
+            throw new IllegalStateException("No se pueden agregar mas de 3 notas.");
         notas.add(nota);
     }
 
@@ -62,10 +65,9 @@ public class InscripcionMateria implements Evaluable {
     //  Porcentaje de asistencia
     // -------------------------------------------------------
     public double getPorcentajeAsistencia() {
-        if (totalClases == 0) return 0;
+        if (totalClases == 0) return 100; // sin clases = regular por defecto
         return (clasesAsistidas * 100.0) / totalClases;
     }
-
     // -------------------------------------------------------
     //  Implementación de Evaluable
     // -------------------------------------------------------

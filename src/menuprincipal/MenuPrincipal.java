@@ -213,8 +213,8 @@ public class MenuPrincipal {
         }
 
         // Punto 4: no permitir más de 5 notas
-        if (ins.getNotas().size() >= 5) {
-            System.out.println("  Ya se alcanzó el límite de 5 notas para esta materia.\n");
+        if (ins.getNotas().size() >= 3) {
+            System.out.println("  Ya se alcanzó el límite de 3 notas para esta materia.\n");
             mostrarNotasMateria(ins);
             pausar();
             return;
@@ -280,7 +280,7 @@ public class MenuPrincipal {
             System.out.printf("  Promedio : %.2f%n", ins.getPromedio());
             System.out.println("  Estado   : " + (ins.estaAprobada() ? "APROBADA" : "No aprobada"));
         }
-        System.out.println("  Notas restantes: " + (5 - notas.size()) + " de 5");
+        System.out.println("  Notas restantes: " + (3 - notas.size()) + " de 3");
         System.out.println("  ----------------------------------------");
     }
 
@@ -289,16 +289,157 @@ public class MenuPrincipal {
     // -------------------------------------------------------
 
     static void verReportes() {
+        int subOpcion;
 
-        System.out.println("------------- VER REPORTES -------------");
-        System.out.println("           Resumen del sistema:         ");
-        System.out.println("   Total de estudiantes registrados :  0");
-        System.out.println("   Total de materias                :  0");
-        System.out.println("   Total de asistencias registradas :  0");
-        System.out.println("   Total de calificaciones          :  0");
-        System.out.println("----------------------------------------");
+        do {
+            System.out.println("----------------------------------------");
+            System.out.println("|           VER REPORTES               |");
+            System.out.println("----------------------------------------");
+            System.out.println("|  1. Situacion general                |");
+            System.out.println("|  2. Materias en riesgo               |");
+            System.out.println("|  3. Materias aprobadas               |");
+            System.out.println("|  4. Volver al menu principal         |");
+            System.out.println("----------------------------------------");
+            System.out.print("Seleccione una opcion: ");
+
+            subOpcion = leerEnteroSubMenu();
+
+            switch (subOpcion) {
+                case 1: reporteSituacionGeneral(); break;
+                case 2: reporteMateriasEnRiesgo();  break;
+                case 3: reporteMateriasAprobadas(); break;
+                case 4: System.out.println("  Volviendo al menu principal...\n"); break;
+                default: System.out.println("\n  Opcion invalida. Ingrese una opcion del 1 al 4.\n");
+            }
+
+        } while (subOpcion != 4);
+    }
+
+    static void reporteSituacionGeneral() {
+        System.out.println("\n-------- SITUACION GENERAL --------");
+
+        ArrayList<InscripcionMateria> materias = estudiante.getMaterias();
+
+        if (materias.isEmpty()) {
+            System.out.println("  No hay materias inscriptas.\n");
+            pausar();
+            return;
+        }
+
+        int regulares = 0, enRiesgo = 0, libres = 0;
+
+        for (InscripcionMateria ins : materias) {
+            double asistencia = ins.getPorcentajeAsistencia();
+            String condicion = ins.getCondicion();
+            String estado;
+
+            if (ins.estaAprobada()) {
+                estado = "Aprobada";
+            } else if (condicion.equals("Libre")) {
+                estado = "Libre";
+            } else {
+                estado = "En curso";
+            }
+
+            System.out.printf("  %-20s | %-8s | Asist: %5.1f%% | Prom: %.2f | %s%n",
+                    ins.getMateria().getNombre(),
+                    condicion,
+                    asistencia,
+                    ins.getPromedio(),
+                    estado);
+
+            if (condicion.equals("Libre")) {
+                libres++;
+            } else if (asistencia >= 75 && asistencia <= 85) {
+                enRiesgo++;
+            } else {
+                regulares++;
+            }
+        }
+
+        System.out.println("-----------------------------------");
+        System.out.printf("  Promedio general     : %.2f%n", estudiante.getPromedioGeneral());
+        System.out.printf("  Materias regulares   : %d%n", regulares);
+        System.out.printf("  Materias en riesgo   : %d%n", enRiesgo);
+        System.out.printf("  Materias libres      : %d%n", libres);
+        System.out.println("-----------------------------------\n");
+
         pausar();
     }
+
+    static void reporteMateriasEnRiesgo() {
+        System.out.println("\n-------- MATERIAS EN RIESGO --------");
+        System.out.println("  (Materias con al menos 1 nota y promedio < 4)");
+
+        ArrayList<InscripcionMateria> criticas = estudiante.getMateriasCriticas();
+
+        if (criticas.isEmpty()) {
+            System.out.println("  No hay materias en riesgo. ¡Bien!\n");
+            pausar();
+            return;
+        }
+
+        // Ordenar por promedio ascendente (burbuja)
+        for (int i = 0; i < criticas.size() - 1; i++) {
+            for (int j = 0; j < criticas.size() - 1 - i; j++) {
+                if (criticas.get(j).getPromedio() > criticas.get(j + 1).getPromedio()) {
+                    InscripcionMateria temp = criticas.get(j);
+                    criticas.set(j, criticas.get(j + 1));
+                    criticas.set(j + 1, temp);
+                }
+            }
+        }
+
+        for (InscripcionMateria ins : criticas) {
+            System.out.printf("  %-20s | Promedio: %.2f | Notas: %d%n",
+                    ins.getMateria().getNombre(),
+                    ins.getPromedio(),
+                    ins.getNotas().size());
+        }
+        System.out.println("------------------------------------\n");
+
+        pausar();
+    }
+
+    static void reporteMateriasAprobadas() {
+        System.out.println("\n-------- MATERIAS APROBADAS --------");
+
+        ArrayList<InscripcionMateria> materias = estudiante.getMaterias();
+        ArrayList<InscripcionMateria> aprobadas = new ArrayList<>();
+
+        for (InscripcionMateria ins : materias) {
+            if (ins.estaAprobada()) {
+                aprobadas.add(ins);
+            }
+        }
+
+        if (aprobadas.isEmpty()) {
+            System.out.println("  No hay materias aprobadas aún.\n");
+            pausar();
+            return;
+        }
+
+        double maxProm = -1, minProm = 11, sumaPromedios = 0;
+
+        for (InscripcionMateria ins : aprobadas) {
+            double prom = ins.getPromedio();
+            System.out.printf("  %-20s | Promedio: %.2f%n",
+                    ins.getMateria().getNombre(), prom);
+
+            if (prom > maxProm) maxProm = prom;
+            if (prom < minProm) minProm = prom;
+            sumaPromedios += prom;
+        }
+
+        System.out.println("------------------------------------");
+        System.out.printf("  Nota maxima  : %.2f%n", maxProm);
+        System.out.printf("  Nota minima  : %.2f%n", minProm);
+        System.out.printf("  Promedio gral: %.2f%n", sumaPromedios / aprobadas.size());
+        System.out.println("------------------------------------\n");
+
+        pausar();
+    }
+
     static void inscribirseAMateria() {
         System.out.println("\n-- Inscripcion a materia --");
 
@@ -346,7 +487,7 @@ public class MenuPrincipal {
 
         // Crear objetos y agregar a la lista
         Materia materia = new Materia(nombre, codigo, cuatrimestre, anio);
-        estudiante.inscribirse(materia);
+        estudiante.inscribirse(materia, totalClases);
 
 
         System.out.println("  ✅ Inscripción a '" + nombre + "' registrada correctamente.\n");
